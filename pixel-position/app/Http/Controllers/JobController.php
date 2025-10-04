@@ -6,6 +6,7 @@ use App\Http\Requests\StoreJobRequest;
 use App\Http\Requests\UpdateJobRequest;
 use App\Models\Job;
 use App\Models\Tag;
+use Illuminate\Support\Facades\Auth;
 
 class JobController extends Controller
 {
@@ -14,7 +15,11 @@ class JobController extends Controller
      */
     public function index()
     {
-        $jobs = Job::all()->groupBy('is_featured');
+        $jobs = Job::query()
+            ->with(['employer', 'tags'])
+            ->latest()
+            ->get()
+            ->groupBy('is_featured');
 
         return view('jobs.index', [
             'featuredJobs' => $jobs[1],
@@ -28,7 +33,7 @@ class JobController extends Controller
      */
     public function create()
     {
-        //
+        return view('jobs.create');
     }
 
     /**
@@ -36,7 +41,17 @@ class JobController extends Controller
      */
     public function store(StoreJobRequest $request)
     {
-        //
+        $request['is_featured'] = $request->has('is_featured');
+
+        $job = Auth::user()->employer->jobs()->create($request->except('tags', '_token', '_method'));
+
+        if ($request->has('tags')) {
+            foreach (explode(',', $request->tags) as $tag) {
+                $job->tag($tag);
+            }
+        }
+
+        return redirect('/');
     }
 
     /**

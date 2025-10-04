@@ -25,7 +25,7 @@ class JobFactory extends Factory
                 '$90,000 USD',
                 '$150,000 USD',
             ]),
-            'location' => fake()->randomElement(['Remote', 'On Site', 'Hybrid']),
+            'location' => fake()->city(),
             'schedule' => fake()->randomElement(['Full Time', 'Part Time', 'Contract']),
             'url' => fake()->url(),
             'is_featured' => fake()->boolean(),
